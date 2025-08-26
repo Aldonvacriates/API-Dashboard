@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>API Dashboard — Final JS Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="icon" href="favicon.ico" />
+
+</head>
+<body>
+  <header>
+    <h1>🧪 API Dashboard</h1>
+    <p>Each card is a mini app using a different public API. Built with <code>fetch</code> + <code>async/await</code>.</p>
+  </header>
+
+  <main class="grid">
+    <!-- Dog -->
+    <section class="card" id="card-dog">
+      <header>
+        <h3>🐶 Random Dog</h3>
+        <button class="btn" id="refresh-dog">Refresh</button>
+      </header>
+      <div class="content" id="dog-content">
+        <div class="row muted"><span class="spinner"></span>&nbsp; Loading a stylish pupper…</div>
+      </div>
+    </section>
+
+    <!-- Cat -->
+    <section class="card" id="card-cat">
+      <header>
+        <h3>🐱 Random Cat</h3>
+        <button class="btn" id="refresh-cat">Refresh</button>
+      </header>
+      <div class="content" id="cat-content">
+        <div class="row muted"><span class="spinner"></span>&nbsp; Summoning a fluffy overlord…</div>
+      </div>
+    </section>
+
+    <!-- Weather -->
+    <section class="card" id="card-weather">
+      <header>
+        <h3>🌤️ Weather (Open-Meteo)</h3>
+        <div class="row">
+          <input id="weather-city" placeholder="Enter city (e.g., Denver)" />
+          <button class="btn primary" id="go-weather">Get</button>
+        </div>
+      </header>
+      <div class="content" id="weather-content" class="content">
+        <p class="muted">Tip: try “Denver”, “Paris”, or “Tokyo”.</p>
+      </div>
+    </section>
+
+    <!-- Currency -->
+    <section class="card" id="card-currency">
+      <header>
+        <h3>💱 USD → EUR</h3>
+        <button class="btn" id="refresh-currency">Refresh</button>
+      </header>
+      <div class="content" id="currency-content">
+        <div class="row muted"><span class="spinner"></span>&nbsp; Getting live rate…</div>
+      </div>
+    </section>
+
+    <!-- Movies (TMDB) -->
+    <section class="card" id="card-movies">
+      <header>
+        <h3>🎬 Trending Movies (TMDB)</h3>
+        <div class="row">
+          <input id="tmdb-key" placeholder="TMDB API Key" />
+          <button class="btn primary" id="save-tmdb">Save Key</button>
+          <button class="btn" id="refresh-movies">Refresh</button>
+        </div>
+      </header>
+      <div class="content" id="movies-content">
+        <p class="muted">Enter your TMDB API key and click “Refresh”.</p>
+        <p class="tiny">Get a key at <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">TMDB Developer</a>.</p>
+      </div>
+    </section>
+
+    <!-- GitHub User -->
+    <section class="card" id="card-github">
+      <header>
+        <h3>🧑‍💻 GitHub User</h3>
+        <div class="row">
+          <input id="gh-user" placeholder="octocat" />
+          <button class="btn primary" id="go-gh">Search</button>
+        </div>
+      </header>
+      <div class="content" id="github-content">
+        <p class="muted">Search any username (e.g., <code>octocat</code>).</p>
+      </div>
+    </section>
+
+    <!-- Joke -->
+    <section class="card" id="card-joke">
+      <header>
+        <h3>😂 Random Joke</h3>
+        <button class="btn" id="refresh-joke">Another</button>
+      </header>
+      <div class="content" id="joke-content">
+        <div class="row muted"><span class="spinner"></span>&nbsp; Loading humor…</div>
+      </div>
+    </section>
+
+    <!-- Public APIs -->
+    <section class="card" id="card-publicapis">
+      <header>
+        <h3>📚 Public APIs — Featured</h3>
+        <button class="btn" id="refresh-apis">Randomize</button>
+      </header>
+      <div class="content" id="publicapis-content">
+        <div class="row muted"><span class="spinner"></span>&nbsp; Browsing the API universe…</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
