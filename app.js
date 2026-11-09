@@ -1,8 +1,28 @@
 // ------------------------------
 // Helpers
 // ------------------------------
+// Interpolated values are HTML-escaped, so text from third-party APIs
+// (jokes, GitHub bios, movie titles) or user input is shown as text, not
+// parsed as markup. Wrap already-built markup in raw() to insert it as-is.
+const escapeHtml = (v) =>
+  String(v).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ]
+  );
+const raw = (s) => ({ __raw: String(s) });
 const html = (strings, ...vals) =>
-  strings.map((s, i) => s + (vals[i] ?? "")).join("");
+  strings
+    .map((s, i) => {
+      const v = vals[i];
+      if (v === undefined || v === null) return s;
+      return s + (v && v.__raw !== undefined ? v.__raw : escapeHtml(v));
+    })
+    .join("");
+// Only allow http(s) links from API data in href attributes.
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u ?? "")) ? u : "#");
 const setLoading = (el, msg = "Loading…") => {
   el.innerHTML = html`<div class="row muted">
     <span class="spinner"></span>&nbsp; ${msg}
@@ -192,7 +212,7 @@ async function loadMovies() {
       })
       .join("");
     moviesContent.innerHTML = html`
-      <div class="list">${items}</div>
+      <div class="list">${raw(items)}</div>
       <p class="tiny">Source: themoviedb.org</p>
     `;
   } catch (e) {
@@ -233,7 +253,7 @@ async function loadGitHubUser(user = "octocat") {
             Repos: ${d.public_repos} · Followers: ${d.followers}
           </div>
           <div class="tiny">
-            <a href="${d.html_url}" target="_blank" rel="noreferrer"
+            <a href="${safeUrl(d.html_url)}" target="_blank" rel="noreferrer"
               >Open Profile</a
             >
           </div>
@@ -292,7 +312,7 @@ async function loadPublicAPI() {
         Auth: ${pick.Auth || "None"} · HTTPS: ${pick.HTTPS} · CORS: ${pick.Cors}
       </p>
       <p>
-        <a href="${pick.Link}" target="_blank" rel="noreferrer">Open docs</a>
+        <a href="${safeUrl(pick.Link)}" target="_blank" rel="noreferrer">Open docs</a>
       </p>
       <p class="tiny">Source: publicapis.org</p>
     `;
