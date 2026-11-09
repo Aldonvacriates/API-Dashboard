@@ -35,7 +35,7 @@ Eight cards on one responsive grid (`index.html`, logic in `app.js`):
 ## How it works
 
 - **One small rendering helper with escaping.** `app.js` defines an `html` tagged template that HTML-escapes every interpolated value, so text from third-party APIs (jokes, GitHub names and bios, movie titles) and the user's own input is displayed as text rather than parsed as markup. Prebuilt markup, such as the movie list, is passed through explicitly with `raw()`, and links taken from API data are limited to `http(s)` URLs by `safeUrl()`.
-- **Shared loading and error states.** `setLoading(el, msg)` and `setError(el, err)` in `app.js` are reused by every card. Each loader wraps its requests in `try/catch` and checks the response shape before rendering.
+- **Shared loading and error states.** `setLoading(el, msg)` and `setError(el, err)` in `app.js` are reused by every card. Each loader wraps its requests in `try/catch` and checks the response (status or expected fields) before rendering.
 - **Chained requests for weather.** `geocodeCity()` turns a city name into coordinates with the Open-Meteo geocoding API, then `loadWeather()` uses them to request current temperature, wind speed and humidity. User input is passed through `encodeURIComponent` (weather and GitHub cards).
 - **User-supplied TMDB key.** The repo contains no API keys. The Movies card has an input for the user's own TMDB key; "Save Key" stores it in the browser's `localStorage` under `tmdb_api_key`, and the trending list loads automatically on later visits if a key is saved. The key stays in that browser and is sent only to `api.themoviedb.org` as the `api_key` query parameter.
 
