@@ -2,7 +2,7 @@
 
 A single-page dashboard of eight small widgets, each calling a different public REST API, written in plain HTML, CSS and JavaScript with `fetch` and `async/await`. It is a compact demo of browser-side API work: loading and error states, chained requests, user input, and a user-supplied API key.
 
-**Live demo:** https://api-dashboard-fawn.vercel.app (also on GitHub Pages: https://aldonvacriates.github.io/API-Dashboard/)
+**Live demo:** https://api-dashboard-fawn.vercel.app (also on GitHub Pages: https://aldonvacriates.github.io/api-dashboard/)
 
 Context: JavaScript final project, Coding Temple 2025.
 
@@ -44,8 +44,8 @@ Eight cards on one responsive grid (`index.html`, logic in `app.js`):
 Prerequisites: a modern browser. Optionally Python 3 (or any static file server).
 
 ```bash
-git clone https://github.com/Aldonvacriates/API-Dashboard.git
-cd API-Dashboard
+git clone https://github.com/Aldonvacriates/api-dashboard.git
+cd api-dashboard
 python -m http.server 8000
 # open http://localhost:8000
 ```
@@ -59,7 +59,7 @@ There is no automated test suite.
 ## Project structure
 
 ```
-API-Dashboard/
+api-dashboard/
 ├── index.html   # page markup and the eight card containers
 ├── style.css    # dark theme and responsive grid
 ├── app.js       # helpers and one loader function per card
