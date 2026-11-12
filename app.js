@@ -12,13 +12,16 @@ const escapeHtml = (v) =>
         c
       ]
   );
-const raw = (s) => ({ __raw: String(s) });
+// raw() tags markup with a Symbol key. JSON from an API cannot create one,
+// so an API value can never be mistaken for prebuilt markup.
+const RAW = Symbol("raw");
+const raw = (s) => ({ [RAW]: String(s) });
 const html = (strings, ...vals) =>
   strings
     .map((s, i) => {
       const v = vals[i];
       if (v === undefined || v === null) return s;
-      return s + (v && v.__raw !== undefined ? v.__raw : escapeHtml(v));
+      return s + (v && v[RAW] !== undefined ? v[RAW] : escapeHtml(v));
     })
     .join("");
 // Only allow http(s) links from API data in href attributes.
