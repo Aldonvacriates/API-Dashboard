@@ -135,7 +135,7 @@ weatherCityInput.addEventListener("keydown", (e) => {
 });
 
 // ------------------------------
-// CURRENCY — Frankfurter (central bank reference rates, no key)
+// CURRENCY — Frankfurter (blended daily rates, no key)
 // ------------------------------
 // Call api.frankfurter.dev directly: the old api.frankfurter.app address
 // answers with a redirect that has no CORS header, so browsers block it.

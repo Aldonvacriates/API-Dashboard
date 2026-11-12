@@ -15,7 +15,7 @@ Eight cards on one responsive grid (`index.html`, logic in `app.js`):
 | Random Dog | [dog.ceo](https://dog.ceo/dog-api/) | Refresh button |
 | Random Cat | [TheCatAPI](https://thecatapi.com/) | Refresh button |
 | Weather by city | [Open-Meteo](https://open-meteo.com/) geocoding + forecast | City name (Enter or button), defaults to Denver |
-| USD to EUR rate | [Frankfurter](https://frankfurter.dev/) (central bank reference rates) | Refresh button |
+| USD to EUR rate | [Frankfurter](https://frankfurter.dev/) (daily rates blended from central banks and official sources) | Refresh button |
 | Trending movies | [TMDB](https://developer.themoviedb.org/docs/getting-started) | Your own TMDB API key |
 | GitHub user lookup | GitHub REST API (`/users/{username}`) | Username (Enter or button), defaults to `octocat` |
 | Random joke | [JokeAPI](https://jokeapi.dev/) (safe mode, single-line jokes) | "Another" button |
