@@ -1,8 +1,31 @@
 // ------------------------------
 // Helpers
 // ------------------------------
+// Interpolated values are HTML-escaped, so text from third-party APIs
+// (jokes, GitHub bios, movie titles) or user input is shown as text, not
+// parsed as markup. Wrap already-built markup in raw() to insert it as-is.
+const escapeHtml = (v) =>
+  String(v).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ]
+  );
+// raw() tags markup with a Symbol key. JSON from an API cannot create one,
+// so an API value can never be mistaken for prebuilt markup.
+const RAW = Symbol("raw");
+const raw = (s) => ({ [RAW]: String(s) });
 const html = (strings, ...vals) =>
-  strings.map((s, i) => s + (vals[i] ?? "")).join("");
+  strings
+    .map((s, i) => {
+      const v = vals[i];
+      if (v === undefined || v === null) return s;
+      return s + (v && v[RAW] !== undefined ? v[RAW] : escapeHtml(v));
+    })
+    .join("");
+// Only allow http(s) links from API data in href attributes.
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u ?? "")) ? u : "#");
 const setLoading = (el, msg = "Loading…") => {
   el.innerHTML = html`<div class="row muted">
     <span class="spinner"></span>&nbsp; ${msg}
@@ -82,7 +105,7 @@ async function loadWeather(city) {
   try {
     const { lat, lon, label } = await geocodeCity(city);
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,relative_humidity_2m`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,relative_humidity_2m&wind_speed_unit=kmh`
     );
     const data = await res.json();
     const cur = data?.current;
@@ -95,7 +118,7 @@ async function loadWeather(city) {
         <div class="muted">at ${label}</div>
       </div>
       <p class="tiny">
-        Wind: ${Math.round(cur.wind_speed_10m)} m/s · Humidity:
+        Wind: ${Math.round(cur.wind_speed_10m)} km/h · Humidity:
         ${cur.relative_humidity_2m}%
       </p>
       <p class="tiny">Source: open-meteo.com</p>
@@ -112,21 +135,22 @@ weatherCityInput.addEventListener("keydown", (e) => {
 });
 
 // ------------------------------
-// CURRENCY — exchangerate.host (free)
+// CURRENCY — Frankfurter (blended daily rates, no key)
 // ------------------------------
+// Call api.frankfurter.dev directly: the old api.frankfurter.app address
+// answers with a redirect that has no CORS header, so browsers block it.
 const currencyContent = document.getElementById("currency-content");
 async function loadCurrency() {
   setLoading(currencyContent, "Fetching USD→EUR rate…");
   try {
-    const res = await fetch(
-      "https://api.exchangerate.host/latest?base=USD&symbols=EUR"
-    );
+    const res = await fetch("https://api.frankfurter.dev/v2/rate/USD/EUR");
+    if (!res.ok) throw new Error(`Rate request failed (HTTP ${res.status}).`);
     const data = await res.json();
-    const rate = data?.rates?.EUR;
-    if (!rate) throw new Error("Rate not found.");
+    const rate = data?.rate;
+    if (typeof rate !== "number") throw new Error("Rate not found.");
     currencyContent.innerHTML = html`
       <p><strong>1 USD</strong> = <strong>${rate.toFixed(4)} EUR</strong></p>
-      <p class="tiny">Date: ${data.date} · Source: exchangerate.host</p>
+      <p class="tiny">Date: ${data.date} · Source: frankfurter.dev</p>
     `;
   } catch (e) {
     setError(currencyContent, e);
@@ -192,7 +216,7 @@ async function loadMovies() {
       })
       .join("");
     moviesContent.innerHTML = html`
-      <div class="list">${items}</div>
+      <div class="list">${raw(items)}</div>
       <p class="tiny">Source: themoviedb.org</p>
     `;
   } catch (e) {
@@ -233,7 +257,7 @@ async function loadGitHubUser(user = "octocat") {
             Repos: ${d.public_repos} · Followers: ${d.followers}
           </div>
           <div class="tiny">
-            <a href="${d.html_url}" target="_blank" rel="noreferrer"
+            <a href="${safeUrl(d.html_url)}" target="_blank" rel="noreferrer"
               >Open Profile</a
             >
           </div>
@@ -275,26 +299,29 @@ async function loadJoke() {
 document.getElementById("refresh-joke").addEventListener("click", loadJoke);
 
 // ------------------------------
-// PUBLIC APIs — api.publicapis.org
+// PUBLIC APIs — freepublicapis.com (random listing, no key)
 // ------------------------------
 const apisContent = document.getElementById("publicapis-content");
 async function loadPublicAPI() {
   setLoading(apisContent, "Finding a cool public API…");
   try {
-    const res = await fetch("https://api.publicapis.org/entries");
-    const data = await res.json();
-    const entries = data?.entries || [];
-    if (!entries.length) throw new Error("No entries.");
-    const pick = entries[Math.floor(Math.random() * entries.length)];
+    const res = await fetch("https://www.freepublicapis.com/api/random");
+    if (!res.ok) throw new Error(`API list request failed (HTTP ${res.status}).`);
+    const pick = await res.json();
+    if (!pick?.title) throw new Error("No API found.");
     apisContent.innerHTML = html`
-      <p><strong>${pick.API}</strong> — ${pick.Description}</p>
+      <p><strong>${pick.emoji} ${pick.title}</strong> — ${pick.description}</p>
       <p class="tiny">
-        Auth: ${pick.Auth || "None"} · HTTPS: ${pick.HTTPS} · CORS: ${pick.Cors}
+        Endpoints: ${pick.methods ?? "N/A"} · Health score:
+        ${pick.health != null ? `${pick.health}/100` : "N/A"}
       </p>
       <p>
-        <a href="${pick.Link}" target="_blank" rel="noreferrer">Open docs</a>
+        <a href="${safeUrl(pick.documentation)}" target="_blank" rel="noreferrer">Open docs</a>
       </p>
-      <p class="tiny">Source: publicapis.org</p>
+      <p class="tiny">
+        Source:
+        <a href="${safeUrl(pick.source)}" target="_blank" rel="noreferrer">freepublicapis.com</a>
+      </p>
     `;
   } catch (e) {
     setError(apisContent, e);

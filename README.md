@@ -1,131 +1,78 @@
-# 🧪 Final JavaScript Project: API Dashboard
+# API Dashboard
 
-A single-page dashboard of mini apps, each powered by a different public API. Built with vanilla HTML/CSS/JS and `fetch` + `async/await`. Optimized to look good even on small screens (e.g., iPhone SE).
+A single-page dashboard of eight small widgets, each calling a different public REST API, written in plain HTML, CSS and JavaScript with `fetch` and `async/await`. It is a compact demo of browser-side API work: loading and error states, chained requests, user input, and a user-supplied API key.
 
-## 🎯 What You’ll Build
-Eight independent widgets living on one grid page:
+**Live demo:** https://api-dashboard-fawn.vercel.app (also on GitHub Pages: https://aldonvacriates.github.io/api-dashboard/)
 
-- 🐶 Random Dog (dog.ceo)
-- 🐱 Random Cat (TheCatAPI)
-- 🌤️ Weather by City (Open-Meteo + Geocoding)
-- 💱 USD → EUR Rate (exchangerate.host)
-- 🎬 Trending Movies (TMDB) **requires API key**
-- 🧑‍💻 GitHub User Lookup
-- 😂 Random Joke (JokeAPI)
-- 📚 Featured Public API (publicapis.org)
+Context: JavaScript final project, Coding Temple 2025.
 
-Each card has its own loading state, error handling, and basic UI controls.
+## Features
 
----
+Eight cards on one responsive grid (`index.html`, logic in `app.js`):
 
-## 🗂 Project Structure
+| Card | API | Input |
+| --- | --- | --- |
+| Random Dog | [dog.ceo](https://dog.ceo/dog-api/) | Refresh button |
+| Random Cat | [TheCatAPI](https://thecatapi.com/) | Refresh button |
+| Weather by city | [Open-Meteo](https://open-meteo.com/) geocoding + forecast | City name (Enter or button), defaults to Denver |
+| USD to EUR rate | [Frankfurter](https://frankfurter.dev/) (daily rates blended from central banks and official sources) | Refresh button |
+| Trending movies | [TMDB](https://developer.themoviedb.org/docs/getting-started) | Your own TMDB API key |
+| GitHub user lookup | GitHub REST API (`/users/{username}`) | Username (Enter or button), defaults to `octocat` |
+| Random joke | [JokeAPI](https://jokeapi.dev/) (safe mode, single-line jokes) | "Another" button |
+| Featured public API | [Free Public APIs](https://www.freepublicapis.com/api) (`/api/random`) | Randomize button |
+
+- Every card shows its own loading spinner and its own error message, so one failing API does not affect the others.
+- No API keys are needed except for TMDB, which the user enters at runtime (see below).
+- The layout adapts to small screens: a viewport meta tag, a CSS grid of `repeat(auto-fill, minmax(280px, 1fr))` columns that collapses to one column on phones, wrapping control rows, and a `clamp()`-sized heading (`style.css`).
+
+## Tech stack
+
+- HTML, CSS (custom properties, CSS grid, flexbox), vanilla JavaScript (ES2020+)
+- Browser `fetch` API, `localStorage`
+- No framework, no build step, no dependencies
+- Hosted as static files on Vercel and GitHub Pages
+
+## How it works
+
+- **One small rendering helper with escaping.** `app.js` defines an `html` tagged template that HTML-escapes every interpolated value, so text from third-party APIs (jokes, GitHub names and bios, movie titles) and the user's own input is displayed as text rather than parsed as markup. Prebuilt markup, such as the movie list, is passed through explicitly with `raw()`, and links taken from API data are limited to `http(s)` URLs by `safeUrl()`.
+- **Shared loading and error states.** `setLoading(el, msg)` and `setError(el, err)` in `app.js` are reused by every card. Each loader wraps its requests in `try/catch` and checks the response (status or expected fields) before rendering.
+- **Chained requests for weather.** `geocodeCity()` turns a city name into coordinates with the Open-Meteo geocoding API, then `loadWeather()` uses them to request current temperature (°C), wind speed (km/h, requested explicitly with `wind_speed_unit=kmh`) and humidity. User input is passed through `encodeURIComponent` (weather and GitHub cards).
+- **Keyless APIs the browser can call directly.** Apart from TMDB, every card uses an API that needs no key and sends `Access-Control-Allow-Origin: *`, so the page calls it straight from the browser with no backend. The exchange-rate card calls `api.frankfurter.dev/v2/rate/USD/EUR` directly, because the older `api.frankfurter.app` address answers with a redirect that has no CORS header. The public-API card uses the `/api/random` endpoint of freepublicapis.com, which has a free limit of 1,000 requests a day.
+- **User-supplied TMDB key.** The repo contains no API keys. The Movies card has an input for the user's own TMDB key; "Save Key" stores it in the browser's `localStorage` under `tmdb_api_key`, and the trending list loads automatically on later visits if a key is saved. The key stays in that browser and is sent only to `api.themoviedb.org` as the `api_key` query parameter.
+
+## Getting started
+
+Prerequisites: a modern browser. Optionally Python 3 (or any static file server).
+
+```bash
+git clone https://github.com/Aldonvacriates/api-dashboard.git
+cd api-dashboard
+python -m http.server 8000
+# open http://localhost:8000
+```
+
+Opening `index.html` directly also works, but a local server is closer to how the deployed site runs.
+
+There are no environment variables and no `.env` file. To use the Movies card, get a free API key from TMDB ([getting started guide](https://developer.themoviedb.org/docs/getting-started)), paste it into the card, click **Save Key**, then **Refresh**.
+
+There is no automated test suite.
+
+## Project structure
+
+```
 api-dashboard/
-├── index.html
-├── style.css
-└── app.js
+├── index.html   # page markup and the eight card containers
+├── style.css    # dark theme and responsive grid
+├── app.js       # helpers and one loader function per card
+└── favicon.ico
+```
 
-markdown
-Copy
-Edit
+## What I'd improve next
 
-- `index.html` — markup and card containers
-- `style.css` — responsive grid + dark UI styling
-- `app.js` — all logic and `fetch` calls
+- Factor the eight near-identical card loaders into one reusable card component.
+- Add a few unit tests for the helpers and response parsing.
+- Remember the last city and GitHub username in `localStorage`.
 
----
+## Credits
 
-## 🚀 Getting Started
-
-### Option A: Open Locally
-1. Download/clone the folder.
-2. Double-click `index.html` to open in your browser.
-
-### Option B: Use a Local Server (recommended for devtools/paths)
-- VS Code → “Live Server” extension → Open `index.html`.
-- Or run any simple static server (e.g., `python -m http.server`).
-
-### Option C: CodePen
-- Create a new Pen.
-- Paste **HTML** from `index.html` (inside the HTML panel’s `<body>`).
-- Paste **CSS** from `style.css`.
-- Paste **JS** from `app.js` (as external JS).
-
----
-
-## 🔑 API Keys (TMDB only)
-
-The Movies card needs a TMDB API key.
-
-1. Get a key: https://www.themoviedb.org/settings/api
-2. Paste it into the **TMDB API Key** input on the Movies card.
-3. Click **Save Key** (stored in `localStorage`), then **Refresh**.
-
-> Everything else works without keys.
-
----
-
-## 🔌 APIs & Endpoints
-
-- **Dog**: `https://dog.ceo/api/breeds/image/random`
-- **Cat**: `https://api.thecatapi.com/v1/images/search`
-- **Weather (Geocode)**:  
-  `https://geocoding-api.open-meteo.com/v1/search?name={CITY}&count=1`  
-  **Weather (Current):**  
-  `https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}&current=temperature_2m,wind_speed_10m,relative_humidity_2m`
-- **Currency**: `https://api.exchangerate.host/latest?base=USD&symbols=EUR`
-- **TMDB Trending**: `https://api.themoviedb.org/3/trending/movie/day?api_key=YOUR_KEY`
-- **GitHub User**: `https://api.github.com/users/{USERNAME}`
-- **Joke**: `https://v2.jokeapi.dev/joke/Any?type=single&safe-mode`
-- **Public APIs**: `https://api.publicapis.org/entries`
-
----
-
-## 🧠 Learning Objectives (Covered)
-- `fetch()` + `async/await`
-- DOM updates with `innerHTML`, `createElement`, event listeners
-- Handling different response shapes (arrays/objects/nested)
-- Loading states, try/catch error handling
-- ES6+ syntax (arrow functions, template literals, destructuring)
-
----
-
-## ♿ Accessibility & Alt Text
-- Images include concise, purpose-driven `alt` text (no “image of …”).  
-- Focus styles preserved; buttons are keyboard-friendly.
-- Color choices maintain contrast against the dark theme.
-
----
-
-## 🧩 Tips & Debugging
-
-Use DevTools → **Network** to inspect calls and responses.
-
-Common messages you might see (and what to check):
-- **“City not found.”** → Try a different spelling; the geocoder returns no results.
-- **“TMDB request failed (check your key).”** → Paste a valid TMDB key and click **Save Key**.
-- **“GitHub user "xyz" not found.”** → Username typo or non-existent account.
-- **“Rate not found.” / “No joke found.”** → Temporary API hiccup — click refresh again.
-
-If an API ever blocks HTTP from `file://` pages, run a local server (see “Getting Started”).
-
----
-
-## 🌟 Stretch Ideas
-- “Refresh All” button with throttling
-- Auto-refresh intervals per card
-- Theme toggle (dark/light)
-- Weather: unit toggle °C/°F
-- GitHub: show recent repos
-- TMDB: search by title, show details modal
-- Save user preferences in `localStorage` (city, GitHub handle, etc.)
-
----
-
-## 📄 License
-MIT — use freely in portfolios and coursework.
-
----
-
-## 🙏 Credits
-- Public data from: Dog CEO, TheCatAPI, Open-Meteo, exchangerate.host, TMDB, GitHub API, JokeAPI, publicapis.org.
-- Designed and coded by **Aldo Herrera** as part of the JavaScript portfolio project.
+Data from Dog CEO, TheCatAPI, Open-Meteo, Frankfurter, TMDB, the GitHub REST API, JokeAPI and Free Public APIs (freepublicapis.com). This product uses the TMDB API but is not endorsed or certified by TMDB.
