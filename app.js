@@ -132,21 +132,22 @@ weatherCityInput.addEventListener("keydown", (e) => {
 });
 
 // ------------------------------
-// CURRENCY — exchangerate.host (free)
+// CURRENCY — Frankfurter (central bank reference rates, no key)
 // ------------------------------
+// Call api.frankfurter.dev directly: the old api.frankfurter.app address
+// answers with a redirect that has no CORS header, so browsers block it.
 const currencyContent = document.getElementById("currency-content");
 async function loadCurrency() {
   setLoading(currencyContent, "Fetching USD→EUR rate…");
   try {
-    const res = await fetch(
-      "https://api.exchangerate.host/latest?base=USD&symbols=EUR"
-    );
+    const res = await fetch("https://api.frankfurter.dev/v2/rate/USD/EUR");
+    if (!res.ok) throw new Error(`Rate request failed (HTTP ${res.status}).`);
     const data = await res.json();
-    const rate = data?.rates?.EUR;
-    if (!rate) throw new Error("Rate not found.");
+    const rate = data?.rate;
+    if (typeof rate !== "number") throw new Error("Rate not found.");
     currencyContent.innerHTML = html`
       <p><strong>1 USD</strong> = <strong>${rate.toFixed(4)} EUR</strong></p>
-      <p class="tiny">Date: ${data.date} · Source: exchangerate.host</p>
+      <p class="tiny">Date: ${data.date} · Source: frankfurter.dev</p>
     `;
   } catch (e) {
     setError(currencyContent, e);
