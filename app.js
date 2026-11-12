@@ -296,26 +296,29 @@ async function loadJoke() {
 document.getElementById("refresh-joke").addEventListener("click", loadJoke);
 
 // ------------------------------
-// PUBLIC APIs — api.publicapis.org
+// PUBLIC APIs — freepublicapis.com (random listing, no key)
 // ------------------------------
 const apisContent = document.getElementById("publicapis-content");
 async function loadPublicAPI() {
   setLoading(apisContent, "Finding a cool public API…");
   try {
-    const res = await fetch("https://api.publicapis.org/entries");
-    const data = await res.json();
-    const entries = data?.entries || [];
-    if (!entries.length) throw new Error("No entries.");
-    const pick = entries[Math.floor(Math.random() * entries.length)];
+    const res = await fetch("https://www.freepublicapis.com/api/random");
+    if (!res.ok) throw new Error(`API list request failed (HTTP ${res.status}).`);
+    const pick = await res.json();
+    if (!pick?.title) throw new Error("No API found.");
     apisContent.innerHTML = html`
-      <p><strong>${pick.API}</strong> — ${pick.Description}</p>
+      <p><strong>${pick.emoji} ${pick.title}</strong> — ${pick.description}</p>
       <p class="tiny">
-        Auth: ${pick.Auth || "None"} · HTTPS: ${pick.HTTPS} · CORS: ${pick.Cors}
+        Endpoints: ${pick.methods ?? "N/A"} · Health score:
+        ${pick.health != null ? `${pick.health}/100` : "N/A"}
       </p>
       <p>
-        <a href="${safeUrl(pick.Link)}" target="_blank" rel="noreferrer">Open docs</a>
+        <a href="${safeUrl(pick.documentation)}" target="_blank" rel="noreferrer">Open docs</a>
       </p>
-      <p class="tiny">Source: publicapis.org</p>
+      <p class="tiny">
+        Source:
+        <a href="${safeUrl(pick.source)}" target="_blank" rel="noreferrer">freepublicapis.com</a>
+      </p>
     `;
   } catch (e) {
     setError(apisContent, e);
