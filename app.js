@@ -102,7 +102,7 @@ async function loadWeather(city) {
   try {
     const { lat, lon, label } = await geocodeCity(city);
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,relative_humidity_2m`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,relative_humidity_2m&wind_speed_unit=kmh`
     );
     const data = await res.json();
     const cur = data?.current;
@@ -115,7 +115,7 @@ async function loadWeather(city) {
         <div class="muted">at ${label}</div>
       </div>
       <p class="tiny">
-        Wind: ${Math.round(cur.wind_speed_10m)} m/s · Humidity:
+        Wind: ${Math.round(cur.wind_speed_10m)} km/h · Humidity:
         ${cur.relative_humidity_2m}%
       </p>
       <p class="tiny">Source: open-meteo.com</p>
